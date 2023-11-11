@@ -1,0 +1,234 @@
+﻿@model IEnumerable<Employee_Managment.Models.Employee>
+<div class="container">
+    <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+        <div class="card-body">
+            <h2 class="card-title">Employee List</h2>
+            <p>
+                <a asp-action="Create" class="btn mb-2">Create New</a>
+                <a asp-action="ExportToExcel" class="btn mb-2">Export to Excel</a>
+                <a asp-action="CurrentMonthPunches" asp-controller="PunchEvents" class="btn mb-2">View Punch Events</a>
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead>
+                        <tr class="employee-header">
+
+                            <th>Punch In</th>
+                            <th>Name</th>
+                            <th>Basic + DA</th>
+                            <!-- <th>Per Day</th> -->
+                            <th>Total Days</th>
+                            <th>Present Days</th>
+                            <th>Absent Days</th>
+                            <!-- <th>Sunday Holiday</th> -->
+                            <th>CL+</th>
+                            <!-- <th>Total Payable Days</th>
+                            <th>Payable Amount</th>
+                            <th>Professional Tax</th>
+                            <th>P.F@12 %</th>
+                            <th>ESIC@0.75 %</th>
+                            <th>Extra Deduction/Arrears</th>
+                            <th>Net Amount Payable</th> -->
+                            <!-- <th></th>
+                            <th></th>
+                            <th></th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="employee-row">
+                                <td>
+                                    <button class="btn btn-primary punch-in" data-employee-id="@item.Id" data-toggle="modal" data-target="#punchModal">Punch</button>
+
+                                </td>
+                                <td class="Name">@item.Name</td>
+                                <td class="BasicAndDA">@item.BasicAndDA</td>
+                                <td class="TotalDays">@item.TotalDays</td>
+                                <td class="PresentDays">@item.PresentDays</td>
+                                <td class="AbsentDays">@item.AbsentDays</td>
+                                <td class="CL">@item.CL</td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Edit</a>
+                                </td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Details</a>
+                                </td>
+                                <td>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="modal fade" id="punchModal" tabindex="-1" role="dialog" aria-labelledby="punchModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="punchModalLabel">Punch In / Punch Out</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form asp-action="CreatePunch" asp-controller="PunchEvents" method="post">
+                                <div class="modal-body">
+                                    <!-- Updated form with hidden fields -->
+
+                                    <input type="hidden" name="EmployeeId" id="employeeId" value="" />
+                                    <input type="hidden" name="SelectedDate" id="selectedDate" value="" />
+
+                                    <div class="form-group">
+                                        <label for="punchInTime">Punch In Time:</label>
+                                        <input type="time" class="form-control" id="punchInTime" name="PunchIn" required placeholder="HH:mm:ss">
+                                        <span id="punchInTimeError" class="text-danger"></span>
+                                    </div>
+                                    @*  <div class="form-group">
+                                    <label for="punchOutTime">Punch Out Time:</label>
+                                    <input type="time" class="form-control" id="punchOutTime" name="PunchOut" placeholder="HH:mm:ss">
+                                    <span id="punchOutTimeError" class="text-danger"></span>
+                                    </div> *@
+                                    <!-- Submit button and other form elements -->
+
+
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save</button>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if (TempData["Message"] != null)
+    {
+        <script>
+            console.log('Message:', '@TempData["Message"]');
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: '@TempData["Message"]'
+            });
+        </script>
+    }
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            // // Input validation for punch-in and punch-out times
+            // $('#punchInTime').on('input', function () {
+            //     var punchInTime = $(this).val();
+            //     var punchOutTime = $('#punchOutTime').val();
+            //     validateTimes(punchInTime, punchOutTime, 'punchInTimeError');
+            // });
+
+            // $('#punchOutTime').on('input', function () {
+            //     var punchInTime = $('#punchInTime').val();
+            //     var punchOutTime = $(this).val();
+            //     validateTimes(punchInTime, punchOutTime, 'punchOutTimeError');
+            // });
+
+            // function validateTimes(punchInTime, punchOutTime, errorElement) {
+            //     if (punchInTime && punchOutTime && punchInTime >= punchOutTime) {
+            //         $('#' + errorElement).text('Punch Out time must be greater than Punch In time.');
+            //         $('#savePunch').prop('disabled', true);
+            //     } else {
+            //         $('#' + errorElement).text('');
+            //         $('#savePunch').prop('disabled', false);
+            //     }
+            //
+            $('#punchModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var employeeId = button.data('employee-id');
+                $('#employeeId').val(employeeId);
+
+                $.get('@Url.Action("CheckPunchExists", "PunchEvents")', { employeeId: employeeId }, function (data) {
+                    if (data.punchExists) {
+                        $('#punchInTime').prop('disabled', true);
+
+                        // Parse the date and time string and create a JavaScript Date object
+                        var punchInTime = new Date(data.formattedPunchInTime);
+
+                        // Check if the parsed date is valid
+                        if (!isNaN(punchInTime.getTime())) {
+                            var hours = ('0' + punchInTime.getHours()).slice(-2);
+                            var minutes = ('0' + punchInTime.getMinutes()).slice(-2);
+                            var formattedPunchInTime = hours + ':' + minutes;
+
+                            $('#punchInTime').val(formattedPunchInTime); // Set the punchInTime value here
+                        } else {
+                            // Log or debug here to see if punchInTime is not in the correct format
+                            console.error('Invalid date format:', data.formattedPunchInTime);
+
+                            // Handle the case when the date is not in the correct format, set a default value, or handle it according to your requirement
+                            $('#punchInTime').val('00:00');
+                        }
+                    } else {
+                        $('#punchInTime').prop('disabled', false);
+                    }
+                });
+            });
+
+            // Handling the "Save" button click
+            $('#savePunch').click(function (e) {
+                e.preventDefault(); // Prevent the default form submission
+
+                var employeeId = $('#employeeId').val();
+                var punchInTime = $('#punchInTime').val();
+                // var punchOutTime = $('#punchOutTime').val();
+                // var selectedDate = $('#selectedDate').val();
+                // Format punchIn and punchOut with a date part
+                var formattedPunchIn = selectedDate + 'T' + punchInTime;
+                // var formattedPunchOut = selectedDate + 'T' + punchOutTime;
+                // Create a PunchEvent object to send to the controller
+                var punchEvent = {
+                    EmployeeId: employeeId,
+                    PunchIn: formattedPunchIn
+                    // PunchOut: formattedPunchOut
+                };
+
+                var createUrl = $('#savePunch').data('create-url');
+
+                // Perform an AJAX request to PunchEventsController
+                $.post(createUrl, { punchEvent: punchEvent })
+                    .done(function (data) {
+                        if (data.success) {
+                            location.reload(); // Reload the page after a successful punch
+                        } else {
+                            alert(data.message); // Display an error message
+                        }
+                    })
+                    .fail(function () {
+                        alert('An error occurred while saving the punch.');
+                    });
+
+                $('#punchModal').modal('hide');
+
+            });
+        });
+
+    </script>
+
+
+}

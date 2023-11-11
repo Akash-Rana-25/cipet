@@ -1,0 +1,71 @@
+﻿@model Employee_Managment.Models.Employee
+
+<h1>Employee Details</h1>
+
+<div class="container">
+    <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+        <div class="card-body">
+    <table class="table table-bordered">
+        <tr>
+            <th>Name</th>
+            <td>@Model.Name</td>
+        </tr>
+        <tr>
+            <th>Basic + DA</th>
+            <td>@Model.BasicAndDA</td>
+        </tr>
+        <tr>
+            <th>Per Day</th>
+            <td>@Model.PerDay</td>
+        </tr>
+        <tr>
+            <th>Total Days</th>
+            <td>@Model.TotalDays</td>
+        </tr>
+        <tr>
+            <th>Present Days</th>
+            <td>@Model.PresentDays</td>
+        </tr>
+        <tr>
+            <th>Absent Days</th>
+            <td>@Model.AbsentDays</td>
+        </tr>
+        <tr>
+            <th>Sunday Holiday (4 + 2)</th>
+            <td>@Model.SundayHoliday</td>
+        </tr>
+        <tr>
+            <th>CL</th>
+            <td>@Model.CL</td>
+        </tr>
+        <!-- Add rows for other properties here -->
+        <tr>
+            <th>Total Payable Days</th>
+            <td>@Model.TotalPayableDays</td>
+        </tr>
+        <tr>
+            <th>Payable Amount</th>
+            <td>@Model.PayableAmount</td>
+        </tr>
+        <tr>
+            <th>Professional Tax (12%)</th>
+            <td>@Model.ProfessionalTax</td>
+        </tr>
+        <tr>
+            <th>Extra Deduction/Arrears</th>
+            <td>@Model.ExtraDeduction</td>
+        </tr>
+        <tr>
+            <th>Net Amount Payable</th>
+            <td>@Model.NetAmountPayable</td>
+        </tr>
+        <!-- Add rows for other properties here -->
+    </table>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <a asp-action="Index">Back to List</a>
+</div>
+

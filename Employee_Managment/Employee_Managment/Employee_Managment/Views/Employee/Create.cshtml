@@ -1,0 +1,197 @@
+﻿@model Employee_Managment.Models.Employee
+
+
+<div class="container">
+    <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+        <div class="card-body">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <!-- Employee Information Section -->
+        <h2>Employee Information</h2>
+        <table class="table">
+            <tr>
+                <td>
+                    <div class="form-group">
+                                 <label asp-for="Name">Name</label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="BasicAndDA">Basic + DA</label>
+                                <input asp-for="BasicAndDA" class="form-control" />
+                                <span asp-validation-for="BasicAndDA" class="text-danger"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label>Per Day</label>
+                                <input asp-for="PerDay" class="form-control" readonly />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="TotalDays">Total Days</label>
+                                <input asp-for="TotalDays" class="form-control" readonly />
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="PresentDays">Present Days</label>
+                                <input asp-for="PresentDays" class="form-control" value="0" readonly />
+                                <span asp-validation-for="PresentDays" class="text-danger"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="AbsentDays">Absent Days</label>
+                                <input asp-for="AbsentDays" class="form-control" value="0"  readonly />
+                                <span asp-validation-for="AbsentDays" class="text-danger"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="SundayHoliday">Sunday Holiday: 4 + 2</label>
+                                <input asp-for="SundayHoliday" class="form-control" />
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="CL">CL+</label>
+                                <input asp-for="CL" class="form-control" value="12" readonly />
+                    </div>
+                </td>
+                <td></td> <!-- Leave this cell empty -->
+            </tr>
+        </table>
+
+        <!-- Other Information Section -->
+      @*   <h2>Other Information</h2>
+        <table class="table">
+            <!-- Add fields for other properties here -->
+            <!-- Example row for an unclear property -->
+           @*  <tr>
+                <td>
+                    <div class="form-group">
+                        <label>Unclear Property 1</label>
+                        <input asp-for="UnclearProperty1" class="form-control" />
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label>Unclear Property 2</label>
+                        <input asp-for="UnclearProperty2" class="form-control" />
+                    </div>
+                </td>
+                <td></td> <!-- Leave this cell empty -->
+            </tr> 
+        </table> *@
+
+        <!-- Payable Information Section -->
+        <h2>Payable Information</h2>
+        <table class="table">
+            <tr>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="TotalPayableDays">Total Payable Days</label>
+                                <input asp-for="TotalPayableDays" class="form-control" />
+                                <span asp-validation-for="TotalPayableDays" class="text-danger"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="PayableAmount">Payable Amount</label>
+                                <input asp-for="PayableAmount" class="form-control" />
+                                <span asp-validation-for="PayableAmount" class="text-danger"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <label>Professional Tax (12%)</label>
+                                <input asp-for="ProfessionalTax" class="form-control" readonly />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="ExtraDeduction">Extra Deduction/Arrears</label>
+                                <input asp-for="ExtraDeduction" class="form-control" />
+                                <span asp-validation-for="ExtraDeduction" class="text-danger"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group">
+                                <label asp-for="NetAmountPayable">Net Amount Payable</label>
+                                <input asp-for="NetAmountPayable" class="form-control" />
+                                <span asp-validation-for="NetAmountPayable" class="text-danger"></span>
+                    </div>
+                </td>
+                <td></td> <!-- Leave this cell empty -->
+            </tr>
+
+        </table>
+
+        <div class="form-group">
+            <input type="submit" value="Create" class="btn mt-1" />
+        </div>
+    </form>
+        </div>
+    </div>
+</div>
+
+
+<a asp-action="Index">Back to List</a>
+@section Scripts {
+
+    <script>
+        // Define the function to get the number of days in a month
+        function daysInMonth(month, year) {
+            return new Date(year, month, 0).getDate();
+        }
+        $(document).ready(function () {
+            // Get the current month and year
+            var currentMonth = new Date().getMonth() + 1; // Get current month (1-based)
+            var currentYear = new Date().getFullYear();
+
+            // Set the initial value of Total Days to the number of days in the current month
+            $('#TotalDays').val(daysInMonth(currentMonth, currentYear));
+
+            $('#BasicAndDA').change(function () {
+                var basicDA = parseFloat($('#BasicAndDA').val());
+                var totalDays = parseFloat($('#TotalDays').val());
+
+                console.log('BasicDA:', basicDA);
+                console.log('TotalDays:', totalDays);
+
+                if (!isNaN(basicDA) && !isNaN(totalDays) && totalDays > 0) {
+                    var perDay = basicDA / totalDays;
+                    var professionalTax = 0; // Initialize tax to 0
+
+                    // Check if salary is above 12,000, set tax to 200, otherwise keep it as 0
+                    if (basicDA > 12000) {
+                        professionalTax = 200;
+                    }
+
+                    console.log('PerDay:', perDay);
+                    console.log('ProfessionalTax:', professionalTax);
+
+                    $('#PerDay').val(perDay.toFixed(2)); // Display two decimal places
+                    $('#ProfessionalTax').val(professionalTax.toFixed(2)); // Display two decimal places
+                } else {
+                    $('#PerDay').val('');
+                    $('#ProfessionalTax').val('');
+                }
+            });
+        });
+
+
+    </script>
+}
+
