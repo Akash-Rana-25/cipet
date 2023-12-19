@@ -21,13 +21,11 @@ namespace Employee_Managment.Models
         public decimal ExtraDeduction { get; set; }
         public decimal NetAmountPayable { get; set; }
 
+        public decimal leaveaddjust { get; set; }
         public bool IsDeleted { get; set; } // New property for soft delete
 
         [DataType(DataType.Date)]
         public DateTime CreationDate { get; set; } // Property to track when the record was inserted [DataType(DataType.Date)]
-
-        //[Display(Name = "Profile Photo")]
-        //public byte[] ProfilePhoto { get; set; } // byte array to store the photo data
 
     }
 

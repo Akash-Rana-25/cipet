@@ -46,24 +46,15 @@ namespace Employee_Managment.Controllers
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name, BasicAndDA, PerDay, TotalDays, PresentDays, AbsentDays, SundayHoliday, CL, TotalPayableDays, PayableAmount, ProfessionalTax, PF, ESIC, ExtraDeduction, NetAmountPayable, ProfilePhoto")] Employee employee, IFormFile photoFile)
+        public async Task<IActionResult> Create([Bind("Name, BasicAndDA, PerDay, TotalDays, PresentDays, AbsentDays, SundayHoliday, CL, TotalPayableDays, PayableAmount, ProfessionalTax, PF, ESIC, ExtraDeduction, NetAmountPayable")] Employee employee)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    // Handle profile photo upload
-                    if (photoFile != null && photoFile.Length > 0)
-                    {
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await photoFile.CopyToAsync(memoryStream);
-                            employee.ProfilePhoto = memoryStream.ToArray();
-                        }
-                    }
-
                     employee.CreationDate = DateTime.Now; // Set the creation date
                     await _employeeRepository.CreateEmployeeAsync(employee);
                     TempData["Message"] = "Employee created successfully!";
@@ -77,7 +68,6 @@ namespace Employee_Managment.Controllers
                 return View(employee);
             }
         }
-
 
 
         // GET: Employee/Edit/5

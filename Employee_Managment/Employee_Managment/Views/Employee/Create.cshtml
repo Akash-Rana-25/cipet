@@ -1,18 +1,11 @@
 ﻿@model Employee_Managment.Models.Employee
 
-
 <div class="container">
     <div class="card shadow-lg p-3 mb-5 bg-white rounded">
         <div class="card-body">
     <form asp-action="Create">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-              @*   <!-- Profile Photo Section -->
-                <h2>Profile Photo</h2>
-                <div class="form-group">
-                    <label asp-for="ProfilePhoto">Profile Photo</label>
-                    <input asp-for="ProfilePhoto" type="file" class="form-control-file" />
-                    <span asp-validation-for="ProfilePhoto" class="text-danger"></span>
-                </div> *@
+
         <!-- Employee Information Section -->
         <h2>Employee Information</h2>
         <table class="table">
@@ -73,31 +66,15 @@
                                 <input asp-for="CL" class="form-control" value="12" readonly />
                     </div>
                 </td>
+                        <td>
+                            <div class="form-group">
+                                <label asp-for="leaveaddjust">Leave Add Just</label>
+                                <input asp-for="leaveaddjust" class="form-control" value="0" readonly />
+                            </div>
+                        </td>
                 <td></td> <!-- Leave this cell empty -->
             </tr>
         </table>
-
-        <!-- Other Information Section -->
-      @*   <h2>Other Information</h2>
-        <table class="table">
-            <!-- Add fields for other properties here -->
-            <!-- Example row for an unclear property -->
-           @*  <tr>
-                <td>
-                    <div class="form-group">
-                        <label>Unclear Property 1</label>
-                        <input asp-for="UnclearProperty1" class="form-control" />
-                    </div>
-                </td>
-                <td>
-                    <div class="form-group">
-                        <label>Unclear Property 2</label>
-                        <input asp-for="UnclearProperty2" class="form-control" />
-                    </div>
-                </td>
-                <td></td> <!-- Leave this cell empty -->
-            </tr> 
-        </table> *@
 
         <!-- Payable Information Section -->
         <h2>Payable Information</h2>
@@ -123,6 +100,18 @@
                                 <input asp-for="ProfessionalTax" class="form-control" readonly />
                     </div>
                 </td>
+                        <td>
+                            <div class="form-group">
+                                <label>P.F.12 %</label>
+                                <input asp-for="PF" id="PF" class="form-control" readonly />
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group">
+                                <label>ESIC 0.75 %</label>
+                                <input asp-for="ESIC" id="ESIC" class="form-control" readonly />
+                            </div>
+                        </td>
             </tr>
             <tr>
                 <td>
@@ -135,8 +124,7 @@
                 <td>
                     <div class="form-group">
                                 <label asp-for="NetAmountPayable">Net Amount Payable</label>
-                                <input asp-for="NetAmountPayable" class="form-control" />
-                                <span asp-validation-for="NetAmountPayable" class="text-danger"></span>
+                                <input asp-for="NetAmountPayable" class="form-control" readonly />
                     </div>
                 </td>
                 <td></td> <!-- Leave this cell empty -->
@@ -161,6 +149,22 @@
         function daysInMonth(month, year) {
             return new Date(year, month, 0).getDate();
         }
+
+        // Define the function to calculate PF and ESIC
+        function calculatePfAndEsic(payableAmount, basicAndDA) {
+            // Check if BasicAndDA is less than or equal to 15000
+            var pf = 0;
+            if (basicAndDA <= 15000) {
+                // Calculate PF (12% of Payable Amount)
+                pf = Math.round(payableAmount * 0.12);
+            }
+
+            // Calculate ESIC (0.75% of Payable Amount)
+            var esic = Math.round(payableAmount * 0.0075);
+
+            return { pf: pf, esic: esic };
+        }
+
         $(document).ready(function () {
             // Get the current month and year
             var currentMonth = new Date().getMonth() + 1; // Get current month (1-based)
@@ -195,9 +199,32 @@
                     $('#ProfessionalTax').val('');
                 }
             });
+
+            $('#PayableAmount').change(function () {
+                var payableAmount = parseFloat($('#PayableAmount').val());
+                var basicDA = parseFloat($('#BasicAndDA').val());
+
+                console.log('PayableAmount:', payableAmount);
+
+                if (!isNaN(payableAmount) && !isNaN(basicDA)) {
+                    // Calculate PF and ESIC
+                    var pfEsic = calculatePfAndEsic(payableAmount, basicDA);
+                    $('#PF').val(pfEsic.pf);
+                    $('#ESIC').val(pfEsic.esic);
+
+                    // Calculate Net Amount Payable
+                    var professionalTax = parseFloat($('#ProfessionalTax').val()) || 0;
+                    var extraDeduction = parseFloat($('#ExtraDeduction').val()) || 0;
+
+                    var netAmountPayable = payableAmount - professionalTax - pfEsic.pf - pfEsic.esic - extraDeduction;
+                    $('#NetAmountPayable').val(Math.round(netAmountPayable));
+                } else {
+                    $('#PF').val('');
+                    $('#ESIC').val('');
+                    $('#NetAmountPayable').val('');
+                }
+            });
         });
-
-
     </script>
 }
 

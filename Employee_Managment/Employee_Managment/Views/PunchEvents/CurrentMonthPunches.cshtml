@@ -1,0 +1,252 @@
+﻿@model IEnumerable<Employee_Managment.DTO.ViewPunchEvents>
+
+<div class="container">
+    <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+        <div class="card-body">
+            <h2>Punch Events for the Current Month</h2>
+
+            <label for="selectedDate">Select Date:</label>
+            <input type="date" id="selectedDate" name="selectedDate" class="form-control mb-1" style="width: 150px" maxlength="10">
+
+            <button class="btn btn-success mb-2" onclick="exportToExcel()">Export to Excel</button>
+
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Date</th>
+                        <th>Punch In</th>
+                        <th>Punch Out</th>
+                        <th>Punch Duration</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var punchEvent in Model)
+                    {
+                        <tr>
+                            <td>@punchEvent.EmployeeName</td>
+                            <td>@punchEvent.PunchIn.ToString("yyyy-MM-dd")</td>
+                            <td>@punchEvent.PunchIn.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>@punchEvent.PunchOut.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            @{
+                                var durationParts = punchEvent.PunchDuration.Split(' ');
+                                int hours = 0;
+                                int minutes = 0;
+
+                                if (durationParts.Length >= 2)
+                                {
+                                    if (durationParts[1] == "hours")
+                                    {
+                                        int.TryParse(durationParts[0], out hours);
+                                    }
+
+                                    if (durationParts.Length >= 4 && durationParts[3] == "minutes")
+                                    {
+                                        int.TryParse(durationParts[2], out minutes);
+                                    }
+                                }
+
+                                var totalMinutes = hours * 60 + minutes;
+                                string textColor = totalMinutes >= 480 ? "green" : "red";
+                            }
+
+                            <td style="color: @textColor">
+                                @(hours.ToString("D2") + "." + minutes.ToString("D2"))
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-primary" onclick="editPunch('@punchEvent.Id', '@punchEvent.EmployeeId', '@punchEvent.EmployeeName', '@punchEvent.PunchIn', '@punchEvent.PunchOut')">Edit</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <a asp-action="Index" asp-controller="Employee" class="btn mb-2">Back To List</a>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Punch Event</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closemodal()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="punchEventId" />
+                <input type="hidden" id="employeeId" />
+
+                <div class="form-group">
+                    <label for="employeeName">Employee Name:</label>
+                    <input type="text" id="employeeName" class="form-control" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label for="punchIn">Punch In:</label>
+                    <input type="datetime-local" id="punchIn" class="form-control">
+                    <span id="punchInTimeError" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="punchOut">Punch Out:</label>
+                    <input type="datetime-local" id="punchOut" class="form-control">
+                    <span id="punchOutTimeError" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closemodal()">Close</button>
+                <button type="button" class="btn btn-primary" id="saveEdit">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+   <script>
+    $('#punchIn').on('input', function () {
+        var punchInTime = $(this).val();
+        var punchOutTime = $('#punchOut').val();
+        validateTimes(punchInTime, punchOutTime, 'punchInTimeError');
+    });
+
+    $('#punchOut').on('input', function () {
+        var punchInTime = $('#punchIn').val();
+        var punchOutTime = $(this).val();
+        validateTimes(punchInTime, punchOutTime, 'punchOutTimeError');
+    });
+
+    function validateTimes(punchIn, punchOut, errorElement) {
+        if (punchIn && punchOut && punchIn >= punchOut) {
+            $('#' + errorElement).text('Punch Out time must be greater than Punch In time');
+            $('#saveEdit').prop('disabled', true);
+        } else {
+            $('#' + errorElement).text('');
+            $('#saveEdit').prop('disabled', false);
+        }
+    }
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     setCurrentDate();
+        // });
+
+        document.addEventListener("change", function (event) {
+            var selectedDateInput = event.target;
+            if (selectedDateInput && selectedDateInput.id === "selectedDate") {
+                var selectedDate = selectedDateInput.value;
+                var formattedDate = formatDateForURL(selectedDate);
+                var url = '/PunchEvents/CurrentMonthPunches?selectedDate=' + formattedDate;
+                window.location.href = url;
+            }
+        });
+
+        function formatDateForURL(dateString) {
+            var date = new Date(dateString);
+            var year = date.getFullYear();
+            var month = (date.getMonth() + 1).toString().padStart(2, '0');
+            var day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+
+    function exportToExcel() {
+        var selectedDate = document.getElementById("selectedDate").value;
+        window.location.href = '/PunchEvents/ExportToExcel?selectedDate=' + selectedDate;
+    }
+
+        function editPunch(punchEventId, employeeId, employeeName, punchIn, punchOut) {
+            $('#editModal').modal('show');
+            $('#punchEventId').val(punchEventId);
+            $('#employeeId').val(employeeId);
+            $('#employeeName').val(employeeName);
+            $('#punchIn').val(formatDateForInput(punchIn));
+
+            // Set "Punch Out" by default to the same value as "Punch In"
+            // $('#punchOut').val($('#punchIn').val());
+
+            $('#punchOutTimeError').text(''); // Clear any error message for "Punch Out"
+        }
+
+        function formatDateForInput(dateString) {
+            var date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return "";  // Return an empty string for invalid dates
+            }
+            var year = date.getFullYear();
+            var month = (date.getMonth() + 1).toString().padStart(2, '0');
+            var day = date.getDate().toString().padStart(2, '0');
+            var hours = date.getHours().toString().padStart(2, '0');
+            var minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+
+       $('#saveEdit').click(function () {
+            console.log('Save button clicked');
+            var punchEventId = $('#punchEventId').val();
+            console.log(punchEventId);
+           var employeeId = $('#employeeId').val();
+           var punchIn = $('#punchIn').val();
+           var punchOut = $('#punchOut').val();
+           console.log(compareTime(punchIn, punchOut));
+           if (compareTime(punchIn, punchOut)) {
+               var data = {
+                   Id: parseInt(punchEventId),
+                   EmployeeId: parseInt(employeeId),
+                   PunchIn: punchIn,
+                   PunchOut: punchOut
+               };
+                console.log(JSON.stringify(data));
+               $.ajax({
+                    url: '/PunchEvents/Edit/' + punchEventId,
+                   type: 'POST',
+                   contentType: 'application/json',
+                   data: JSON.stringify(data),
+                   success: function (response) {
+                       console.log(response);
+                       Swal.fire({
+                           icon: 'success',
+                           title: 'Punch Event Edited Successfully',
+                           showConfirmButton: false,
+                           timer: 1500
+                       });
+                       $('#editModal').modal('hide');
+                   },
+                   error: function (error) {
+                       console.error(error);
+                       Swal.fire({
+                           icon: 'error',
+                           title: 'Error Editing Punch Event',
+                           text: 'An error occurred while editing the punch event.',
+                           confirmButtonText: 'OK'
+                       });
+                   }
+               });
+                
+           }
+       });
+
+    function compareTime(time1, time2) {
+            console.log(time1);
+            console.log(time2);
+        // var date = new Date();
+        // var time1Parts = time1.split(':');
+        // var time2Parts = time2.split(':');
+        // var dateTime1 = new Date(date.getFullYear(), date.getMonth(), date.getDate(), parseInt(time1Parts[0]), parseInt(time1Parts[1]));
+        // var dateTime2 = new Date(date.getFullYear(), date.getMonth(), date.getDate(), parseInt(time2Parts[0]), parseInt(time2Parts[1]));
+        return new Date(time1) < new Date(time2);
+    }
+
+    function closemodal() {
+        $('#editModal').modal('hide');
+    }
+</script>
+
+}
